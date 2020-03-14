@@ -8,12 +8,12 @@ interface Fragment {
     definition?: string;
 }
 
-const fragmentName = '([_a-zA-Z]+[\\w\\p{L}\\p{S}\\p{N}\\.]*)';
+const fragmentName = '([_a-zA-Z]+[\\w\\p{L}\\p{N}\\p{S}\\.]*)';
 const nameBlacklist = ['on', 'fragment'];
 const validFragmentName = new RegExp(`^${fragmentName}$`, 'gu');
-const fragmentSpreadName = new RegExp(`\.{3}\s*${fragmentName}`, 'gu');
+const fragmentSpreadName = new RegExp(`\\.{3}\s*${fragmentName}`, 'gu');
 const fragmentDefinitionName =
-    new RegExp(`[\W](?:fragment[\s]${fragmentName}[\s]+)`, 'gu');
+    new RegExp(`[\\W](?:fragment[\\s]${fragmentName}[\\s]+)`, 'gu');
 
 /**
  * Helper function to determine if a fragment name is valid.
@@ -38,7 +38,7 @@ export function isValidName(name: string): boolean {
  *
  * @returns An string array of found and validly spread fragment names
  */
-function getSpreadFragmentNames(definition: string): string[] {
+export function getSpreadFragmentNames(definition: string): string[] {
     // Reset the index
     fragmentSpreadName.lastIndex = 0;
     const matches = definition.matchAll(fragmentSpreadName);
@@ -46,9 +46,17 @@ function getSpreadFragmentNames(definition: string): string[] {
 
     for (const match of matches) {
         const name = match[1];
-        if (isValidName(name) && !dependencies.includes(name)) {
-            dependencies.push(name);
-        }
+        // Check if it has some matches which are back to back ("...one...two")
+        // and then split them
+        ((/\.{2,}/g.test(name)) ? name.split(/\.{2,}/g) : [name])
+            .forEach(nameToAdd => {
+                if (
+                    isValidName(nameToAdd)
+                    && !dependencies.includes(nameToAdd)
+                ) {
+                    dependencies.push(nameToAdd);
+                }
+            });
     }
 
     return dependencies;
@@ -63,7 +71,7 @@ function getSpreadFragmentNames(definition: string): string[] {
  *
  * @returns An string array of defined fragment names
  */
-function getDefinedFragmentNames(definition: string): string[] {
+export function getDefinedFragmentNames(definition: string): string[] {
     // Reset the index
     fragmentDefinitionName.lastIndex = 0;
     const matches = definition.matchAll(fragmentDefinitionName);
