@@ -1,18 +1,48 @@
 {
   "name": "dynql",
   "version": "0.1.0",
-  "description": "A library to dynamically generate graphql-queries",
-  "main": "src/index.js",
-  "repository": "https://github.com/sinexist/dynql",
-  "author": "Dominik Decker",
+  "main": "dist/index.js",
   "license": "MIT",
   "private": false,
+  "description": "A library to dynamically generate graphql-queries",
+  "keywords": [
+    "graphql",
+    "dynamic",
+    "fragments"
+  ],
+  "homepage": "https://github.com/sinexist/dynql",
+  "author": {
+    "name": "Dominik Decker",
+    "email": "dominik.decker97@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sinexist/dynql"
+  },
+  "bugs": {
+    "url": "https://github.com/sinexist/dynql/issues"
+  },
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "mocha ./test/tests.js",
+    "coverage": "nyc --reporter=lcov mocha ./test/tests.js",
+    "report": "nyc --reporter=html mocha ./test/tests.js"
   },
   "dependencies": {},
   "devDependencies": {
+    "@types/chai": "^4.2.11",
+    "@types/mocha": "^7.0.2",
+    "chai": "^4.2.0",
     "eslint": "^6.8.0",
+    "mocha": "^7.1.0",
+    "nyc": "^15.0.0",
     "typescript": "^3.8.3"
-  }
+  },
+  "files": [
+    "dist",
+    "CHANGELOG.md",
+    "LICENSE",
+    "README.md",
+    "package.json"
+  ]
 }
