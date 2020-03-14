@@ -1,3 +1,10 @@
+[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fsinexist%2Fdynql%2Fbadge%3Fref%3Dmaster&style=for-the-badge)](https://github.com/sinexist/dynql/actions)
+[![npm Version](https://img.shields.io/npm/v/dynql.svg?style=for-the-badge)](https://www.npmjs.com/package/dynql)
+[![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/dynql.svg?style=for-the-badge)](https://www.npmjs.com/package/dynql)
+[![Maintainability](https://img.shields.io/codeclimate/maintainability-percentage/sinexist/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/sinexist/dynql)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/sinexist/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/sinexist/dynql)
+[![npm License](https://img.shields.io/npm/l/dynql.svg?style=for-the-badge)](https://spdx.org/licenses/MIT.html)
+
 # DynQL
 
 A simple library to dynamically resolve GraphQL Fragments
