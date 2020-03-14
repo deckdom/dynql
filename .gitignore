@@ -1,6 +1,30 @@
-node_modules/
+##
+# Build/temporary files
+##
+.nyc_output/
 coverage/
 dist/
 
-**/*.js
-!test/**.js
+##
+# Package manager & modules
+##
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+##
+# Editor directories and files
+##
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw*
+
+##
+# OS Files
+##
+.DS_Store
+desktop.ini
