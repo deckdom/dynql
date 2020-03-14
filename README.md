@@ -2,7 +2,7 @@
 [![npm Version](https://img.shields.io/npm/v/dynql.svg?style=for-the-badge)](https://www.npmjs.com/package/dynql)
 [![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/dynql.svg?style=for-the-badge)](https://www.npmjs.com/package/dynql)
 [![Maintainability](https://img.shields.io/codeclimate/maintainability-percentage/SiNEXiST/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/SiNEXiST/dynql)
-[![Test Coverage](https://img.shields.io/codeclimate/coverage/sinexist/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/sinexist/dynql)
+[![Test Coverage](https://img.shields.io/codeclimate/coverage/SiNEXiST/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/SiNEXiST/dynql)
 [![npm License](https://img.shields.io/npm/l/dynql.svg?style=for-the-badge)](https://spdx.org/licenses/MIT.html)
 
 # DynQL
