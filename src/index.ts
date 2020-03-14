@@ -8,7 +8,7 @@ interface Fragment {
     definition?: string;
 }
 
-const fragmentName = '([_a-zA-Z]+[\w\.]*)';
+const fragmentName = '([_a-zA-Z]+[\\w\\p{L}\\p{S}\\p{N}\\.]*)';
 const nameBlacklist = ['on', 'fragment'];
 const validFragmentName = new RegExp(`^${fragmentName}$`, 'gu');
 const fragmentSpreadName = new RegExp(`\.{3}\s*${fragmentName}`, 'gu');
