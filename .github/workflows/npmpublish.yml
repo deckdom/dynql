@@ -9,9 +9,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-node@v1
         with:
           node-version: 12
+
       - name: Cache
         uses: actions/cache@v1.1.0
         with:
@@ -19,26 +21,39 @@ jobs:
           path: node_modules 
           # An explicit key for restoring and saving the cache
           key: ${{ hashFiles('**/yarn.lock') }}
-      - run: yarn ci
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build library
+        run: yarn build
 
   publish-npm:
     needs: build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-          registry-url: https://registry.npmjs.org/
+
       - name: Cache
         uses: actions/cache@v1.1.0
         with:
           # A directory to store and save the cache
-          path: node_modules 
+          path: node_modules
           # An explicit key for restoring and saving the cache
           key: ${{ hashFiles('**/yarn.lock') }}
-      - run: yarn ci
-      - run: yarn publish
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build library
+        run: yarn build
+
+      - name: Publish the library to npm
+        run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
 

@@ -8,9 +8,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - uses: actions/setup-node@v1
         with:
           node-version: 12
+
       - name: Cache
         uses: actions/cache@v1.1.0
         with:
@@ -18,8 +20,13 @@ jobs:
           path: node_modules
           # An explicit key for restoring and saving the cache
           key: ${{ hashFiles('**/yarn.lock') }}
-      - run: yarn ci
-      - run: yarn build
+
+      - name: Install dependencies
+        run: yarn
+
+      - name: Build library
+        run: yarn build
+
       - name: Unit Tests & Code Coverage
         uses: paambaati/codeclimate-action@v2.3.0
         env:
