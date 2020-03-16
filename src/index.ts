@@ -8,12 +8,13 @@ interface Fragment {
     definition?: string;
 }
 
-const fragmentName = '([_a-zA-Z]+[\\w\\p{L}\\p{N}\\p{S}\\.]*)';
+const allowedChars = '[\\w\\p{L}\\p{N}\\p{S}0-9]+';
+const fragmentName = `([_a-zA-Z]${allowedChars}(?:\\.${allowedChars})*)`;
 const nameBlacklist = ['on', 'fragment'];
 const validFragmentName = new RegExp(`^${fragmentName}$`, 'gu');
-const fragmentSpreadName = new RegExp(`\\.{3}\s*${fragmentName}`, 'gu');
+const fragmentSpreadName = new RegExp(`\\.{3}\\s*${fragmentName}`, 'gu');
 const fragmentDefinitionName =
-    new RegExp(`[\\W](?:fragment[\\s]${fragmentName}[\\s]+)`, 'gu');
+    new RegExp(`(?:^|[\\W])(?:fragment[\\s]${fragmentName}[\\s]+)`, 'gu');
 
 /**
  * Helper function to determine if a fragment name is valid.
@@ -48,7 +49,7 @@ export function getSpreadFragmentNames(definition: string): string[] {
         const name = match[1];
         // Check if it has some matches which are back to back ("...one...two")
         // and then split them
-        ((/\.{2,}/g.test(name)) ? name.split(/\.{2,}/g) : [name])
+        ((/\.{3}/g.test(name)) ? name.split(/\.{3}/g) : [name])
             .forEach(nameToAdd => {
                 if (
                     isValidName(nameToAdd)
@@ -78,7 +79,9 @@ export function getDefinedFragmentNames(definition: string): string[] {
     const names: string[] = [];
 
     for (const match of matches) {
-        names.push(match[1]);
+        if (isValidName(match[1])) {
+            names.push(match[1]);
+        }
     }
 
     return names;
@@ -88,7 +91,7 @@ export function getDefinedFragmentNames(definition: string): string[] {
  * An error which is thrown when the FragmentStore could not resolve
  * an required fragment.
  */
-export class UnresolvedFragmentError extends Error {}
+export class UnresolvedFragmentError extends Error { }
 
 /**
  * A store to store fragments in to later resolve them dynamically in a query.
@@ -140,37 +143,32 @@ export class FragmentStore {
         toResolve: string[],
         resolvedFragments: Fragment[] = []
     ): Fragment[] {
-        const newDependencies: string[] = [];
+        toResolve
+            .filter(name =>
+                resolvedFragments.findIndex(frag => frag.name === name) === -1
+            ).forEach(fragmentName => {
+                const fragment = this.store[fragmentName];
+                if (fragment == null) {
+                    throw new UnresolvedFragmentError(
+                        `Could not resolve required fragment ${fragmentName}!`
+                    );
+                }
 
-        for (let i = 0; i < toResolve.length; i++) {
-            const fragmentName = toResolve[i];
-            const fragment = this.store[fragmentName];
-            if (fragment == null) {
-                throw new UnresolvedFragmentError(
-                    `Could not resolve required fragment ${fragmentName}!`
-                );
-            }
+                resolvedFragments.push({
+                    name: fragmentName,
+                    definition: fragment.definition,
+                });
 
-            resolvedFragments.push({
-                name: fragmentName,
-                definition: fragment.definition,
+                if (
+                    fragment.dependsOn != null
+                    && fragment.dependsOn.length > 0
+                ) {
+                    this.resolveFragments(
+                        fragment.dependsOn,
+                        resolvedFragments
+                    );
+                }
             });
-            newDependencies.push(...fragment.dependsOn);
-        }
-
-        const unresolvedFragments = newDependencies
-            .filter(element =>
-                !resolvedFragments
-                    .map(fragment => fragment.name)
-                    .includes(element)
-            );
-
-        if (unresolvedFragments.length > 0) {
-            resolvedFragments.push(...this.resolveFragments(
-                unresolvedFragments,
-                resolvedFragments
-            ));
-        }
 
         return resolvedFragments;
     }
