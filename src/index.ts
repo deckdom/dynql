@@ -8,7 +8,17 @@ interface Fragment {
     definition?: string;
 }
 
-const allowedChars = '[\\w\\p{L}\\p{N}\\p{S}0-9]+';
+let hasUtf8Support: boolean;
+try {
+    // NOTE: Do *NOT* use the direct stlyle: /\p{N}/gu
+    // It'll throw a Syntax Error for the whole script, which is
+    // not capturable by a try catch!
+    new RegExp("/\\p{N}", "gu");
+    hasUtf8Support = true;
+} catch (err) {
+    hasUtf8Support = false;
+}
+const allowedChars = `[\\w0-9${hasUtf8Support ? '\\p{L}\\p{N}\\p{S}' : ''}]+`;
 const fragmentName = `([_a-zA-Z]${allowedChars}(?:\\.${allowedChars})*)`;
 const nameBlacklist = ['on', 'fragment'];
 const validFragmentName = new RegExp(`^${fragmentName}$`, 'gu');

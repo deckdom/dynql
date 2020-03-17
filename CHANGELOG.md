@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+### Fixed
+- The unicode special characters are not supported on each engine.
+The capability to support it will be checked and enabled if possible.
+
 ## [0.1.1] - 2020-03-17
 
 ### Fixed
