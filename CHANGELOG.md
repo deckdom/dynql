@@ -24,6 +24,6 @@ The capability to support it will be checked and enabled if possible.
 - First release with a basic implementation of the fragment loading
 
 [Unreleased]: https://github.com/sinexist/dynql/compare/v0.1.2...HEAD
-[0.1.2]: https://github.com/sinexist/dynql/releases/tag/v0.1.1...v0.1.2
-[0.1.1]: https://github.com/sinexist/dynql/releases/tag/v0.1.0...v0.1.1
+[0.1.2]: https://github.com/sinexist/dynql/releases/tag/v0.1.2
+[0.1.1]: https://github.com/sinexist/dynql/releases/tag/v0.1.1
 [0.1.0]: https://github.com/sinexist/dynql/releases/tag/v0.1.0
