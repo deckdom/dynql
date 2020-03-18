@@ -186,6 +186,6 @@ describe('resolve', () => {
         const store = new dynql.FragmentStore();
         expect(() => {
             store.resolve('{ something { ...foo } }');
-        }).to.throw(dynql.UnresolvedFragmentError);
+        }).to.throw('Could not resolve required fragment foo!');
     })
 });
