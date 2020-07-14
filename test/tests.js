@@ -116,6 +116,79 @@ describe('getDefinedFragmentNames',() => {
     });
 });
 
+describe('register', () => {
+    it('should register fragments with valid names', () => {
+        const store = new dynql.FragmentStore();
+        validNames.forEach(name => {
+            const definition = `fragment ${name} on Something { field }`;
+            const result = store.registerFragment(name, definition);
+            expect(result).to.be.true;
+        });
+    });
+
+    it('should not register fragments with invalid names', () => {
+        const store = new dynql.FragmentStore();
+        invalidNames.forEach(name => {
+            const definition = `fragment ${name} on Something { field }`;
+            const result = store.registerFragment(name, definition);
+            expect(result).to.be.false;
+        });
+    });
+});
+
+describe('unregister', () => {
+    it('should unregister previously registered fragments', () => {
+        [
+            'tmp1',
+            'cool1',
+            'hello_world'
+        ].forEach(name => {
+            const store = new dynql.FragmentStore();
+            const previousFragments = [
+                'test1',
+                'test2',
+                'something1',
+                'something2',
+            ];
+            previousFragments.forEach(prevName => {
+                store.registerFragment(prevName, `fragment ${prevName} on Something { field }`);
+            });
+            store.registerFragment(name, `fragment ${name} on Something { field }`);
+            const resolved = store.resolve(`{ test { ...${name} } }`);
+            expect(resolved).not.to.be.empty;
+            const response = store.unregisterFragment(name);
+            expect(response).to.be.true;
+            expect(function() {
+                store.resolve(`{ test { ...${name} } }`);
+            }).to.throw(`Could not resolve required fragment ${name}!`);
+        });
+    });
+
+    it('should not unregister not yet registered fragments', () => {
+        [
+            'tmp1',
+            'cool1',
+            'hello_world'
+        ].forEach(name => {
+            const store = new dynql.FragmentStore();
+            const previousFragments = [
+                'test1',
+                'test2',
+                'something1',
+                'something2',
+            ];
+            previousFragments.forEach(prevName => {
+                store.registerFragment(prevName, `fragment ${prevName} on Something { field }`);
+            });
+            const response = store.unregisterFragment(name);
+            expect(response).to.be.false;
+            expect(function() {
+                store.resolve(`{ test { ...${name} } }`);
+            }).to.throw(`Could not resolve required fragment ${name}!`);
+        });
+    });
+});
+
 describe('resolve', () => {
     it('resolve regular dependencies', () => {
         const query = '{ something { ...test } }';
