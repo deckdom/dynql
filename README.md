@@ -1,15 +1,13 @@
 <h1 align="center">DynQL</h1>
 
-<span align="center">
-
-[![Build Status](https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fdeckdom%2Fdynql%2Fbadge%3Fref%3Dmaster&style=for-the-badge)](https://github.com/deckdom/dynql/actions)
-[![npm Version](https://img.shields.io/npm/v/dynql.svg?style=for-the-badge)](https://www.npmjs.com/package/dynql)
-[![npm bundle size (minified)](https://img.shields.io/bundlephobia/min/dynql.svg?style=for-the-badge)](https://www.npmjs.com/package/dynql)
-[![Maintainability](https://img.shields.io/codeclimate/maintainability-percentage/deckdom/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/deckdom/dynql)
-[![Test Coverage](https://img.shields.io/codeclimate/coverage/deckdom/dynql.svg?style=for-the-badge)](https://codeclimate.com/github/deckdom/dynql)
-[![npm License](https://img.shields.io/npm/l/dynql.svg?style=for-the-badge)](https://spdx.org/licenses/MIT.html)
-
-</span>
+<p align="center">
+<a href="https://github.com/deckdom/dynql/actions"><img src="https://img.shields.io/endpoint.svg?url=https%3A%2F%2Factions-badge.atrox.dev%2Fdeckdom%2Fdynql%2Fbadge%3Fref%3Dmaster&style=for-the-badge" alt="Build Status"/></a>
+<a href="https://www.npmjs.com/package/dynql"><img src="https://img.shields.io/npm/v/dynql.svg?style=for-the-badge" alt="npm Version"/></a>
+<a href="https://www.npmjs.com/package/dynql"><img src="https://img.shields.io/bundlephobia/min/dynql.svg?style=for-the-badge" alt="npm bundle size (minified)"/></a>
+<a href="https://codeclimate.com/github/deckdom/dynql"><img src="https://img.shields.io/codeclimate/maintainability-percentage/deckdom/dynql.svg?style=for-the-badge" alt="Maintainability"/></a>
+<a href="https://codeclimate.com/github/deckdom/dynql"><img src="https://img.shields.io/codeclimate/coverage/deckdom/dynql.svg?style=for-the-badge" alt="Test Coverage"/></a>
+<a href="https://spdx.org/licenses/MIT.html"><img src="https://img.shields.io/npm/l/dynql.svg?style=for-the-badge" alt="npm License"/></a>
+</p>
 
 A simple library to dynamically resolve GraphQL Fragments
 
