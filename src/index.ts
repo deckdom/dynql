@@ -8,23 +8,12 @@ interface Fragment {
     definition?: string;
 }
 
-let hasUtf8Support: boolean;
-try {
-    // NOTE: Do *NOT* use the direct stlyle: /\p{N}/gu
-    // It'll throw a Syntax Error for the whole script, which is
-    // not capturable by a try catch!
-    new RegExp("/\\p{N}", "gu");
-    hasUtf8Support = true;
-} catch (err) {
-    hasUtf8Support = false;
-}
-const allowedChars = `[\\w0-9${hasUtf8Support ? '\\p{L}\\p{N}\\p{S}' : ''}]+`;
-const fragmentName = `([_a-zA-Z]${allowedChars}(?:\\.${allowedChars})*)`;
-const nameBlacklist = ['on', 'fragment'];
-const validFragmentName = new RegExp(`^${fragmentName}$`, 'gu');
-const fragmentSpreadName = new RegExp(`\\.{3}\\s*${fragmentName}`, 'gu');
+const fragmentName = `([_a-zA-Z][_a-zA-Z0-9]+)`;
+const nameBlacklist = ['on'];
+const validFragmentName = new RegExp(`^${fragmentName}$`, 'g');
+const fragmentSpreadName = new RegExp(`\\.{3}\\s*${fragmentName}`, 'g');
 const fragmentDefinitionName =
-    new RegExp(`(?:^|[\\W])(?:fragment[\\s]${fragmentName}[\\s]+)`, 'gu');
+    new RegExp(`(?:^|[\\W])(?:fragment[\\s]${fragmentName}[\\s]+)`, 'g');
 
 /**
  * Helper function to determine if a fragment name is valid.

@@ -8,7 +8,22 @@ const validNames = [
     'something',
     'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa',
     'seperated_name',
-    'another.name',
+    '_test',
+    '_a_',
+    'fragment',
+    'hello_w0r7d',
+];
+const invalidNames = [
+    '.name',
+    ';name',
+    '-name',
+    '@include',
+    '@skip',
+    '0test',
+    '1test',
+    'on',
+    'with.dot',
+    'aaa...test',
     'utf8_1_Ђ',
     'utf8_2_Ӵ',
     'utf8_3_թ',
@@ -19,17 +34,15 @@ const validNames = [
     'utf8_8_㇎',
     'utf8_9_ꯐ',
     'utf8_10_😀',
+    'another.name',
     'weird|.chars',
-];
-const invalidNames = [
-    '.name',
-    ';name',
-    '-name',
-    '@include',
-    '@skip',
-    'fragment',
-    'on',
-    'aaa...test',
+    'special;chars',
+    '-dash',
+    'dash-',
+    'da-sh',
+    ':colon',
+    'colon:',
+    'col:on',
 ];
 
 describe('isValidName', () => {
@@ -70,12 +83,12 @@ describe('getSpreadFragmentNames', () => {
                 names: ['test1', 'test2'],
             },
             {
-                definition: '{ something { ...test.one...test.two } }',
-                names: ['test.one', 'test.two'],
+                definition: '{ something { ...test_one...test_two } }',
+                names: ['test_one', 'test_two'],
             },
             {
-                definition: '{ something { ...test..one...test.two } }',
-                names: ['test', 'test.two'],
+                definition: '{ something { ...test1one...test_two } }',
+                names: ['test1one', 'test_two'],
             },
             {
                 definition: `{ something { ...test1
