@@ -6,6 +6,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## Unreleased
 
+## [0.3.0] - 2021-03-13
+
+### Added
+- New `findFragmentsFromQuery` function and `autoRegisterFragment` method to register your Fragments automatically.
+
 ## [0.2.0] - 2020-08-11
 
 ### Changes

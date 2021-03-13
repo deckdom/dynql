@@ -8,12 +8,12 @@ interface Fragment {
     definition?: string;
 }
 
-const fragmentName = `([_a-zA-Z][_a-zA-Z0-9]+)`;
+const fragmentName = `[_a-zA-Z][_a-zA-Z0-9]+`;
 const nameBlacklist = ['on'];
-const validFragmentName = new RegExp(`^${fragmentName}$`, 'g');
-const fragmentSpreadName = new RegExp(`\\.{3}\\s*${fragmentName}`, 'g');
+const validFragmentName = new RegExp(`^(${fragmentName})$`, 'g');
+const fragmentSpreadName = new RegExp(`\\.{3}\\s*(${fragmentName})`, 'g');
 const fragmentDefinitionName =
-    new RegExp(`(?:^|[\\W])(?:fragment[\\s]${fragmentName}[\\s]+)`, 'g');
+    new RegExp(`(?:^|[\\W])fragment[\\s]+(${fragmentName})[\\s]+on[\\s]+${fragmentName}`, 'g');
 
 /**
  * Helper function to determine if a fragment name is valid.
@@ -32,7 +32,7 @@ export function isValidName(name: string): boolean {
 
 /**
  * Helper function to get all fragment names which are used in
- * a a spread definition (`...`<fragment_name>`)
+ * a spread definition (`...`<fragment_name>`)
  *
  * @param definition The definition in which should be searched for
  *
@@ -46,22 +46,14 @@ export function getSpreadFragmentNames(definition: string): string[] {
 
     for (const match of matches) {
         const name = match[1];
-        // Check if it has some matches which are back to back ("...one...two")
-        // and then split them
-        ((/\.{3}/g.test(name)) ? name.split(/\.{3}/g) : [name])
-            .forEach(nameToAdd => {
-                if (
-                    isValidName(nameToAdd)
-                    && !dependencies.includes(nameToAdd)
-                ) {
-                    dependencies.push(nameToAdd);
-                }
-            });
+
+        if (isValidName(name) && !dependencies.includes(name)) {
+            dependencies.push(name);
+        }
     }
 
     return dependencies;
 }
-
 
 /**
  * Helper function to get all fragment name which are definied
@@ -87,6 +79,44 @@ export function getDefinedFragmentNames(definition: string): string[] {
 }
 
 /**
+ * Helper function to find all fragments inside of a GraphQL Query and
+ * returns them. Used for auto-registering them into the store.
+ * 
+ * @param query The GraphQL Query which contains fragments you want to extract
+ * @returns A map of all detected fragment-names and it's content 
+ */
+export function findFragmentsFromQuery(query: string) {
+    const out: { [name: string]: string } = {};
+
+    let offset = 0;
+    let buffer = '';
+    let level = 0;
+
+    for (let index = 0; index < query.length; index++) {
+        if (query[index] === '{') {
+            if (level === 0) {
+                buffer = query.slice(offset, index - 1).trim();
+            }
+            level++;
+        } else if (query[index] === '}') {
+            level--;
+            if (level === 0) {
+                // Reset the index from previous match
+                fragmentDefinitionName.lastIndex = 0;
+                const match = fragmentDefinitionName.exec(buffer);
+                if (match != null) {
+                    out[match[1]] = query.slice(offset, index + 1).trim();
+                }
+                offset = index + 1;
+                buffer = '';
+            }
+        }
+    }
+
+    return out;
+}
+
+/**
  * An error which is thrown when the FragmentStore could not resolve
  * an required fragment.
  */
@@ -96,7 +126,23 @@ export class UnresolvedFragmentError extends Error { }
  * A store to store fragments in to later resolve them dynamically in a query.
  */
 export class FragmentStore {
+    /**
+     * Internal store of all fragments
+     */
     private store: { [name: string]: ParsedFragment; } = {};
+
+    /**
+     * @returns All currently saved fragments in this store
+     */
+    public getFragments() {
+        const out = {};
+
+        Object.keys(this.store).forEach(name => {
+            out[name] = this.store[name].definition;
+        });
+
+        return out;
+    }
 
     /**
      * Analyzes the provided query and loads the required fragments
@@ -127,49 +173,23 @@ export class FragmentStore {
     }
 
     /**
-     * Attempts to resolve the fragments from `toResolve` and its potential
-     * required fragments which are not present yet.
-     * Careful, as it modifies the provided `resolvedFragments` array!
-     *
-     * @param toResolve The names of the Fragments which need to be loaded
-     * @param resolvedFragments The already present/resolved fragments
-     *
-     * @returns All resolved Fragments
-     * @throws An `UnresolvedFragmentError` When a required fragment could not
-     *      be found in the store
+     * Function which automatically finds all fragments in the provided
+     * query and registers them.
+     * All names from the found fragments are returned at the end.
+     * 
+     * @param query GraphQL Query/Content with fragments
+     * 
+     * @returns The names of all detected and registered fragments
      */
-    private resolveFragments(
-        toResolve: string[],
-        resolvedFragments: Fragment[] = []
-    ): Fragment[] {
-        toResolve
-            .filter(name =>
-                resolvedFragments.findIndex(frag => frag.name === name) === -1
-            ).forEach(fragmentName => {
-                const fragment = this.store[fragmentName];
-                if (fragment == null) {
-                    throw new UnresolvedFragmentError(
-                        `Could not resolve required fragment ${fragmentName}!`
-                    );
-                }
+    public autoRegisterFragment(query: string): string[] {
+        const found = findFragmentsFromQuery(query);
+        const names = Object.keys(found);
 
-                resolvedFragments.push({
-                    name: fragmentName,
-                    definition: fragment.definition,
-                });
+        names.forEach(name => {
+            this.registerFragment(name, found[name]);
+        });
 
-                if (
-                    fragment.dependsOn != null
-                    && fragment.dependsOn.length > 0
-                ) {
-                    this.resolveFragments(
-                        fragment.dependsOn,
-                        resolvedFragments
-                    );
-                }
-            });
-
-        return resolvedFragments;
+        return names;
     }
 
     /**
@@ -207,5 +227,55 @@ export class FragmentStore {
         }
 
         return false;
+    }
+
+    /**
+     * Attempts to resolve the fragments from `toResolve` and its potential
+     * required fragments which are not present yet.
+     * Careful, as it modifies the provided `resolvedFragments` array!
+     *
+     * @param toResolve The names of the Fragments which need to be loaded
+     * @param resolvedFragments The already present/resolved fragments
+     *
+     * @returns All resolved Fragments
+     * @throws An `UnresolvedFragmentError` When a required fragment could
+     *  not be found in the store
+     */
+    private resolveFragments(
+        toResolve: string[],
+        resolvedFragments: Fragment[] = []
+    ): Fragment[] {
+        toResolve.forEach(fragmentName => {
+            // Check if it's already resolved
+            if (resolvedFragments.findIndex(fragment =>
+                fragment.name === fragmentName) !== -1
+            ) {
+                return;
+            }
+
+            const fragment = this.store[fragmentName];
+            if (fragment == null) {
+                throw new UnresolvedFragmentError(
+                    `Could not resolve required fragment ${fragmentName}!`
+                );
+            }
+
+            resolvedFragments.push({
+                name: fragmentName,
+                definition: fragment.definition,
+            });
+
+            if (
+                fragment.dependsOn != null
+                && fragment.dependsOn.length > 0
+            ) {
+                this.resolveFragments(
+                    fragment.dependsOn,
+                    resolvedFragments
+                );
+            }
+        });
+
+        return resolvedFragments;
     }
 }

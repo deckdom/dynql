@@ -3,6 +3,7 @@
       "lib": ["ESNext"],
       "module": "commonjs",
       "moduleResolution": "node",
+      "sourceMap": true,
       "strictNullChecks": true,
       "declaration": true,
       "importHelpers": true,
