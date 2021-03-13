@@ -28,13 +28,33 @@ import { FragmentStore } from 'dynql';
 
 const store = new FragmentStore();
 
-store.registerFragment("simple", 
-`fragment simple on Something {
+// Manually register your fragment
+store.registerFragment("simple", `fragment simple on Something {
   field1
   field2
+  ...some_other
+  field3 {
+    ...yet_another
+  }
 }`);
 
-store.resolve(`
+// Automatically registers all fragments
+store.autoRegisterFragment(`
+fragment some_other on CoolElement {
+  value1
+  value2
+  nested {
+    ...yet_another
+  }
+}
+
+fragment yet_another on AdvancedValue {
+  hell_world
+}
+`);
+
+// Resolve the required fragments for the query
+const resolvedFragments = store.resolve(`
 query {
   someResolver {
       anElement {
@@ -43,11 +63,19 @@ query {
   }   
 }`);
 
-// Returns
-[ "fragment simple on Something {
+// resolvedFragments
+[`fragment simple on Something {
   field1
   field2
-}" ]
+}`, `fragment some_other on CoolElement {
+  value1
+  value2
+  nested {
+    ...yet_another
+  }
+}`, `fragment yet_another on AdvancedValue {
+  hell_world
+}`]
 ```
 
 ### Nested Example
