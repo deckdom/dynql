@@ -129,6 +129,27 @@ describe('getDefinedFragmentNames',() => {
     });
 });
 
+describe('findFragmentsFromQuery', () => {
+    it('should find all fragments from query', () => {
+        const definitions = {
+            'test1': ' aaa ',
+            'test2': ' ...test1 ',
+            'cool_123_name': ' ...test1 ...test2'
+        }
+        const query = Object.entries(definitions)
+            .map(([name, value]) => `fragment ${name} on AAAAA {${value}}`)
+            .join('\n') + `
+{
+    query {
+        ...cool_123_name
+    }
+}
+        `;
+        const result = dynql.findFragmentsFromQuery(query);
+        expect(result).to.deep.equal(definitions);
+    });
+});
+
 describe('register', () => {
     it('should register fragments with valid names', () => {
         const store = new dynql.FragmentStore();

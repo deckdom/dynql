@@ -1,6 +1,6 @@
 {
   "name": "dynql",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "main": "dist/index.js",
   "license": "MIT",
   "private": false,
@@ -35,6 +35,7 @@
     "eslint": "^7.6.0",
     "mocha": "^8.1.1",
     "nyc": "^15.1.0",
+    "ts-node": "^9.1.1",
     "tslib": "^2.0.1",
     "typescript": "^3.9.7"
   },

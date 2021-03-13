@@ -8,12 +8,12 @@ interface Fragment {
     definition?: string;
 }
 
-const fragmentName = `([_a-zA-Z][_a-zA-Z0-9]+)`;
+const fragmentName = `[_a-zA-Z][_a-zA-Z0-9]+`;
 const nameBlacklist = ['on'];
-const validFragmentName = new RegExp(`^${fragmentName}$`, 'g');
-const fragmentSpreadName = new RegExp(`\\.{3}\\s*${fragmentName}`, 'g');
+const validFragmentName = new RegExp(`^(${fragmentName})$`, 'g');
+const fragmentSpreadName = new RegExp(`\\.{3}\\s*(${fragmentName})`, 'g');
 const fragmentDefinitionName =
-    new RegExp(`(?:^|[\\W])(?:fragment[\\s]${fragmentName}[\\s]+)`, 'g');
+    new RegExp(`(?:^|[\\W])fragment[\\s]+(${fragmentName})[\\s]+on[\\s]+${fragmentName}`, 'g');
 
 /**
  * Helper function to determine if a fragment name is valid.
@@ -87,6 +87,45 @@ export function getDefinedFragmentNames(definition: string): string[] {
 }
 
 /**
+ * Helper function to find all fragments inside of a GraphQL Query and
+ * returns them. Used for auto-registering them into the store.
+ * 
+ * @param query The GraphQL Query which contains fragments you want to extract
+ * @returns A map of all detected fragment-names and it's content 
+ */
+export function findFragmentsFromQuery(query: string): { [name: string]: string } {
+    const out = {};
+
+    let offset = 0;
+    let buffer = '';
+    let level = 0;
+
+    for (let index = 0; index < query.length; index++) {
+        if (query[index] === '{') {
+            if (level === 0) {
+                buffer = query.slice(offset, index - 1);
+            }
+            offset = index + 1;
+            level++;
+        } else if (query[index] === '}') {
+            level--;
+            if (level === 0) {
+                // Reset the index from previous match
+                fragmentDefinitionName.lastIndex = 0;
+                const match = fragmentDefinitionName.exec(buffer);
+                if (match != null) {
+                    out[match[1]] = query.slice(offset, index);
+                }
+                offset = index + 1;
+                buffer = '';
+            }
+        }
+    }
+
+    return out;
+}
+
+/**
  * An error which is thrown when the FragmentStore could not resolve
  * an required fragment.
  */
@@ -124,6 +163,63 @@ export class FragmentStore {
         return resolvedFragments
             .map(fragment => fragment.definition)
             .filter(definition => definition != null) as string[];
+    }
+
+    /**
+     * Function which automatically finds all fragments in the provided
+     * query and registers them.
+     * All names from the found fragments are returned at the end.
+     * 
+     * @param query GraphQL Query/Content with fragments
+     * 
+     * @returns The names of all detected and registered fragments
+     */
+     public autoRegisterFragment(query: string): string[] { 
+        const found = findFragmentsFromQuery(query);
+        const names = Object.keys(found);
+
+        names.forEach(name => {
+            this.registerFragment(name, found[name]);
+        });
+
+        return names;
+    }
+
+    /**
+     * Registers the Fragment to the store
+     *
+     * @param name Name of the fragment to register
+     * @param definition The whole defition of the fragment
+     *
+     * @returns If the fragment has successfully been added
+     */
+     public registerFragment(name: string, definition: string) {
+        if (!isValidName(name)) {
+            return false;
+        }
+
+        this.store[name] = {
+            definition,
+            dependsOn: getSpreadFragmentNames(definition),
+        };
+
+        return true;
+    }
+
+    /**
+     * Removes the specified Fragment from the store.
+     *
+     * @param name The name of the fragment which should be removed
+     *
+     * @returns If the fragment was present and has been removed
+     */
+    public unregisterFragment(name: string) {
+        if (this.store[name]) {
+            delete this.store[name];
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -170,42 +266,5 @@ export class FragmentStore {
             });
 
         return resolvedFragments;
-    }
-
-    /**
-     * Registers the Fragment to the store
-     *
-     * @param name Name of the fragment to register
-     * @param definition The whole defition of the fragment
-     *
-     * @returns If the fragment has successfully been added
-     */
-    public registerFragment(name: string, definition: string) {
-        if (!isValidName(name)) {
-            return false;
-        }
-
-        this.store[name] = {
-            definition,
-            dependsOn: getSpreadFragmentNames(definition),
-        };
-
-        return true;
-    }
-
-    /**
-     * Removes the specified Fragment from the store.
-     *
-     * @param name The name of the fragment which should be removed
-     *
-     * @returns If the fragment was present and has been removed
-     */
-    public unregisterFragment(name: string) {
-        if (this.store[name]) {
-            delete this.store[name];
-            return true;
-        }
-
-        return false;
     }
 }
